@@ -1,0 +1,30 @@
+import asyncio
+import os
+from datetime import datetime as dt
+
+import pytz
+from telegram import Bot
+
+from donquijote.db.mongodb import User
+
+u = User()
+bot = Bot(token=os.environ["BOT_TOKEN"])
+loop = asyncio.get_event_loop()
+
+now = dt.now(pytz.timezone("Europe/Berlin"))
+
+while True:
+    if dt.now().minute != now.minute:
+        now = dt.now(pytz.timezone("Europe/Berlin"))
+        users = u.find_all()
+
+        for user in users:
+            for reminder in user["reminder"]:
+                dt_reminder = dt.strptime(reminder, "%H:%M")
+                if (dt_reminder.hour == now.hour) and (
+                    dt_reminder.minute == now.minute
+                ):
+                    msg = f"Hola {user['name']}! Es hora de aprender tu vocabulario. Escribe /play y podemos empezar."
+                    loop.run_until_complete(
+                        bot.send_message(user["user_id"], msg)
+                    )
