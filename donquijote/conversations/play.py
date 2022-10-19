@@ -22,7 +22,7 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     if not user.exists(user_id=user_info["id"]):
         await update.message.reply_text(
-            f"¡Hola! You're not a registered. Send /start so we can register you.",
+            f"¡Hola! You're not registered yet. Send /start so we can register you.",
             write_timeout=10,
         )
 
@@ -32,19 +32,32 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     if not practice.exists(user_id=u["user_id"], timestamp=dt.now()):
         vocabs = []
+        all_srs = [
+            x["vocab_id"]
+            for x in srs.col.find(
+                {"user_id": u["user_id"]}, {"_id": 0, "vocab_id": 1}
+            )
+        ]
         srs_repeat = list(
             srs.repeat(
-                user_id=user_info["id"],
+                user_id=u["user_id"],
                 timestamp=dt.now().replace(
                     hour=0, minute=0, second=0, microsecond=0
                 ),
+                max_vocabs=u["max_vocabs"],
             )
         )
         if len(srs_repeat) > 0:
             vocab_list = [x["vocab_id"] for x in srs_repeat]
             vocabs += list(vocabulary.from_vocab_list(vocab_list=vocab_list))
 
-        vocabs += list(vocabulary.sample(n_words=int(u["n_words"])))
+        if len(vocabs) < u["max_vocabs"]:
+            vocabs += list(
+                vocabulary.sample(
+                    n_words=min(u["n_words"], u["max_vocabs"] - len(vocabs)),
+                    nin=all_srs,
+                )
+            )
 
         for vocab in vocabs:
             if not srs.exists(

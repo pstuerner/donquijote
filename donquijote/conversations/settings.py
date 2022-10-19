@@ -9,11 +9,12 @@ user = User()
 SETTINGS_ROUTER = 0
 CHANGE_NAME = 1
 CHANGE_WORDS = 6
+CHANGE_MAX_VOCABS = 7
 
 
 async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_info = update.message.from_user
-    reply_keyboard = [["Name", "Reminder"], ["Words A Day"]]
+    reply_keyboard = [["Name", "Reminder"], ["Words A Day", "Max Vocabs"]]
 
     if not user.exists(user_id=user_info["id"]):
         await update.message.reply_text(
@@ -24,7 +25,6 @@ async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         f"You can change your name, deactivate/set your reminders or change the number of words to learn per day.",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard,
-            one_time_keyboard=True,
             input_field_placeholder="Change settings",
         ),
     )
@@ -53,7 +53,6 @@ async def settings_router(
             f"Let's set up your new learning schedule. Do you want to receive any reminders? (Yes/No)",
             reply_markup=ReplyKeyboardMarkup(
                 reply_keyboard,
-                one_time_keyboard=True,
                 input_field_placeholder="Let's study?",
             ),
         )
@@ -65,9 +64,15 @@ async def settings_router(
         )
 
         return CHANGE_WORDS
+    elif choice == "Max Vocabs":
+        await update.message.reply_text(
+            f"Okay, what's the maximum amount of vocabularies you want to learn on a single day?"
+        )
+
+        return CHANGE_MAX_VOCABS
     else:
         await update.message.reply_text(
-            "Oops. Somethings wrong with your input. Send one of the following responses: 'Name', 'Reminder', 'Words A Day'."
+            "Oops. Somethings wrong with your input. Send one of the following responses: 'Name', 'Reminder', 'Words A Day', 'Max Vocabs'."
         )
 
         return SETTINGS_ROUTER
@@ -105,11 +110,36 @@ async def change_words(
 
     user.update(
         user_id=user_info["id"],
-        update_dict={"$set": {"n_words": update.message.text.strip()}},
+        update_dict={"$set": {"n_words": choice}},
     )
 
     await update.message.reply_text(
-        f"Okay, I'll send you {update.message.text} from now on."
+        f"Okay, I'll send you {choice} from now on."
+    )
+
+    return ConversationHandler.END
+
+
+async def change_max_vocabs(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> int:
+    user_info = update.message.from_user
+    choice = int_cast(update.message.text)
+
+    if choice is None:
+        await update.message.reply_text(
+            "Oops. Something's wrong with your input. Please make sure to send me a number, e.g. 20."
+        )
+
+        return CHANGE_MAX_VOCABS
+
+    user.update(
+        user_id=user_info["id"],
+        update_dict={"$set": {"max_vocabs": choice}},
+    )
+
+    await update.message.reply_text(
+        f"Okay, I'll send you not more than {choice} vocabularies on a single day."
     )
 
     return ConversationHandler.END

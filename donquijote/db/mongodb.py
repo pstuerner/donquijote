@@ -30,6 +30,7 @@ class User(Mongo):
                 "name": name,
                 "n_words": n_words,
                 "reminder": reminder,
+                "max_vocabs": 30,
                 "sign_up": sign_up,
             }
         )
@@ -47,13 +48,27 @@ class Vocabulary(Mongo):
         super().__init__()
         self.col = self.db.vocabulary
 
-    def sample(self, n_words):
+    def sample(self, n_words, nin=[]):
         return self.col.aggregate(
-            [{"$sample": {"size": n_words}}, {"$project": {"_id": 0}}]
+            [
+                {"$match": {"vocab_id": {"$nin": nin}}},
+                {"$sample": {"size": n_words}},
+                {"$project": {"_id": 0}},
+            ]
         )
 
     def find(self, vocab_id):
         return self.col.find_one({"vocab_id": vocab_id}, {"_id": 0})
+
+    def range(self, start, end, abbr=None):
+        where = {}
+        if abbr:
+            where = {**where, **{"abbr": abbr}}
+
+        return list(self.col.find(where).sort("freq", 1))[start:end]
+
+    def vocab_count(self, abbr):
+        return self.col.count_documents({"abbr": abbr})
 
     def from_vocab_list(self, vocab_list):
         return self.col.aggregate(
@@ -134,13 +149,26 @@ class SRS(Mongo):
         super().__init__()
         self.col = self.db.srs
 
-    def repeat(self, user_id, timestamp):
-        return self.col.aggregate(
-            [
-                {"$match": {"user_id": user_id, "next_learn": timestamp}},
-                {"$project": {"_id": 0}},
-            ]
+    def repeat(self, user_id, timestamp, max_vocabs=None):
+        vocabs = list(
+            self.col.aggregate(
+                [
+                    {
+                        "$match": {
+                            "user_id": user_id,
+                            "next_learn": {"$lte": timestamp},
+                        }
+                    },
+                    {"$sort": {"quick_repeat": -1, "next_learn": 1}},
+                    {"$project": {"_id": 0}},
+                ]
+            )
         )
+
+        if max_vocabs:
+            vocabs = vocabs[:max_vocabs]
+
+        return vocabs
 
     def find(self, user_id, vocab_id):
         return self.col.find_one(

@@ -24,11 +24,19 @@ from donquijote.conversations.init import (
     what_time,
     words_per_day,
 )
+from donquijote.conversations.learn import (
+    learn,
+    play_learn,
+    which_word_group,
+    which_word_range,
+)
 from donquijote.conversations.play import counts, play, vocab
 from donquijote.conversations.settings import (
+    CHANGE_MAX_VOCABS,
     CHANGE_NAME,
     CHANGE_WORDS,
     SETTINGS_ROUTER,
+    change_max_vocabs,
     change_name,
     change_words,
     settings,
@@ -74,6 +82,25 @@ def main() -> None:
         conversation_timeout=300,
     )
 
+    learn_handler = ConversationHandler(
+        entry_points=[CommandHandler("learn", learn)],
+        states={
+            0: [
+                MessageHandler(
+                    filters.TEXT & (~filters.COMMAND), which_word_group
+                )
+            ],
+            1: [
+                MessageHandler(
+                    filters.TEXT & (~filters.COMMAND), which_word_range
+                )
+            ],
+            2: [MessageHandler(filters.TEXT & (~filters.COMMAND), play_learn)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+        conversation_timeout=300,
+    )
+
     settings_handler = ConversationHandler(
         entry_points=[CommandHandler("settings", settings)],
         states={
@@ -97,15 +124,21 @@ def main() -> None:
             CHANGE_WORDS: [
                 MessageHandler(filters.TEXT & (~filters.COMMAND), change_words)
             ],
+            CHANGE_MAX_VOCABS: [
+                MessageHandler(
+                    filters.TEXT & (~filters.COMMAND), change_max_vocabs
+                )
+            ],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
 
     application.add_handler(play_handler)
+    application.add_handler(learn_handler)
     application.add_handler(init_handler)
     application.add_handler(settings_handler)
 
-    application.run_polling(timeout=20)
+    application.run_polling(timeout=120)
 
 
 if __name__ == "__main__":

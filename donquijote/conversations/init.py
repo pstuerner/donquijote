@@ -115,11 +115,15 @@ async def words_per_day(
 
     await update.message.reply_text(f"{choice} words a day - perfect choice!")
     await update.message.reply_text(
+        f"Depending on your learning progress it's possible that some days have more vocabularies than others. "
+        f"It's useful to restrict the maximum number of vocabularies per day to avoid learning too many words at the same time. "
+        f"I've set the maximum number of words to 30 for now, but you can change this in your settings after the initial setup."
+    )
+    await update.message.reply_text(
         f"Now, let's take care of your learning schedule. I can send you a reminder up to three times a day "
         f"so you won't forget to study your vocabularies. Do you want me to send you reminders? (Yes/No)",
         reply_markup=ReplyKeyboardMarkup(
             reply_keyboard,
-            one_time_keyboard=True,
             input_field_placeholder="Let's study?",
         ),
     )
@@ -135,7 +139,6 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             "Great! How often do you want to practice on a single day?",
             reply_markup=ReplyKeyboardMarkup(
                 [["1x", "2x", "3x"]],
-                one_time_keyboard=True,
                 input_field_placeholder="Study frequency",
             ),
         )
