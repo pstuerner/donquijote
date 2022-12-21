@@ -7,4 +7,4 @@ COPY . code/donquijote
 WORKDIR code/donquijote
 RUN pip3 install -e .
 
-CMD ./start.sh
+CMD ["python3", "donquijote/bot/conversationbot.py"]
