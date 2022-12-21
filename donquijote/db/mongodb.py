@@ -32,6 +32,7 @@ class User(Mongo):
                 "reminder": reminder,
                 "max_vocabs": 30,
                 "sign_up": sign_up,
+                "streak": 0,
             }
         )
 
@@ -106,14 +107,14 @@ class Practice(Mongo):
     def update(self, practice_id, update_dict):
         self.col.update_one({"practice_id": practice_id}, update_dict)
 
-    def insert(self, practice_id, user_id, timestamp, vocabs):
+    def insert(self, practice_id, user_id, timestamp, vocabs, attempts):
         self.col.insert_one(
             {
                 "practice_id": practice_id,
                 "user_id": user_id,
                 "timestamp": timestamp,
                 "vocabs": vocabs,
-                "attempts": {str(v): 0 for v in vocabs},
+                "attempts": attempts,
             }
         )
 
