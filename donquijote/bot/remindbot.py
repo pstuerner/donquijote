@@ -5,6 +5,7 @@ from datetime import datetime as dt
 import pytz
 from telegram import Bot
 
+from donquijote.conversations.helpers import send
 from donquijote.db.mongodb import User
 
 u = User()
@@ -25,6 +26,4 @@ while True:
                     dt_reminder.minute == now.minute
                 ):
                     msg = f"Hola {user['name']}! Es hora de aprender tu vocabulario. Escribe /play y podemos empezar."
-                    loop.run_until_complete(
-                        bot.send_message(user["user_id"], msg)
-                    )
+                    loop.run_until_complete(send(bot, user["user_id"], msg))

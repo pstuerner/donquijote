@@ -45,7 +45,13 @@ from donquijote.conversations.settings import (
 
 
 def main() -> None:
-    application = Application.builder().token(os.environ["BOT_TOKEN"]).build()
+    application = (
+        Application.builder()
+        .token(os.environ["BOT_TOKEN"])
+        .read_timeout(30)
+        .write_timeout(30)
+        .build()
+    )
 
     init_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
