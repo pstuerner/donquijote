@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  donquijote-bot:
+    image: donquijote/bot
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.bot
+    container_name: donquijote-bot
+    restart: always
+    env_file:
+      - "./.env"
+  
+  donquijote-reminder:
+    image: donquijote/reminder
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.reminder
+    container_name: donquijote-reminder
+    restart: always
+    env_file:
+      - "./.env"
