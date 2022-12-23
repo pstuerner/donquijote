@@ -14,6 +14,16 @@ CHANGE_MAX_VOCABS = 7
 
 
 async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Function that starts the settings conversations flow. This flow allows the
+    user to change settings such as name, learning schedule, number of vocabs.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        0, to continue to the SETTINGS_ROUTER step of the conversation
+    """
     user_info = update.message.from_user
     reply_keyboard = [["Name", "Reminder"], ["Words A Day", "Max Vocabs"]]
 
@@ -38,6 +48,19 @@ async def settings(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def settings_router(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    """Function that lets the user choose which setting to change.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        0, if the user input was wrong, to return to the SETTINGS_ROUTER step of the conversation
+        1, to proceed to the CHANGE_NAME step of the conversation
+        3, to proceed to the REMINDER step of the conversation
+        6, to proceed to the CHANGE_WORDS step of the conversation
+        7, to proceed to the CHANGE_MAX_VOCABS step of the conversation
+    """
     user_info = update.message.from_user
     choice = update.message.text
 
@@ -92,6 +115,15 @@ async def settings_router(
 async def change_name(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    """Function that lets the user change the name.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        -1, if the name change was successful, terminates the conversation
+    """
     user_info = update.message.from_user
 
     user.update(
@@ -109,6 +141,15 @@ async def change_name(
 async def change_words(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    """Function that lets the user change the number of words per day.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        -1, if the word change was successful, terminates the conversation
+    """
     user_info = update.message.from_user
     choice = int_cast(update.message.text)
 
@@ -133,6 +174,16 @@ async def change_words(
 async def change_max_vocabs(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    """Function that lets the user change the max amount of words per day.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        -1, if the max amount of words change was successful, terminates the conversation
+        7, if the user input was wrong, to return to the CHANGE_MAX_VOCABS step of the conversation
+    """
     user_info = update.message.from_user
     choice = int_cast(update.message.text)
 

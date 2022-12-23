@@ -16,6 +16,17 @@ srs = SRS()
 
 
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Function that starts the play conversation flow. This conversation  picks a set
+    of words for the user based on which words were already learned and the SRS schedule.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        -1, if the user is not registered yet
+        0, to continue to the vocab step of the conversation.
+    """
     user_info = update.message.from_user
     context.chat_data["chat_id"] = None
     context.chat_data["message_id"] = None
@@ -89,6 +100,26 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 def progress(srs_item, attempts):
+    """Function that helps to determine the SRS steps of the learned
+    vocabulary. A voabulary travels through different stages and each stage
+    is linked to a different time horizon of the next time the vocabulary will
+    be tested again. The higher the stage, the longer the time horizon. If the
+    vocabulary is guessed correctly it will jump one level higher. If the vocabulary
+    is guessed incorrectly it will fall one level lower and set to 'quick_repeat'.
+    Quick repeat means that, ignoring the SRS level, the vocabulary will be tested
+    on the next day as long as it was guessed correctly. If a vocabulary reaches stage 5
+    it's timestamp for the next test will be set to 1.1.2099, meaning that learning this
+    vocabulary has finished.
+
+    Args:
+        srs_item (dict): Dictionary of the SRS item. Contains the level, last_learn timestamp,
+            next_learn timestamp, and the quick_repeat flag.
+        attempts (int): The number of attempts required to correctly guess the vocabulary.
+            Everything larger than 1 is incorrect, as the vocabulary wasn't guessed on first try.
+
+    Returns:
+        dict: The new SRS item dictionary with the updated timestamps, quick_repeat flag, and level.
+    """
     srs_item["last_learn"] = dt.now()
 
     if attempts == 1:
@@ -118,6 +149,18 @@ def progress(srs_item, attempts):
 
 
 async def vocab(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Function that continues the play conversation flow. The bot sends English words,
+    waits for a Spanish response, and checks if the response is correct. This process
+    is repeated until all words were guessed correctly.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        -1, if everything is finished, terminates the conversation
+        0, to return to the vocab step of the conversation
+    """
     if len(context.chat_data["vocabs"]) > 0:
         if context.chat_data["message_id"]:
             await edit_message_text(context)
@@ -243,6 +286,17 @@ async def vocab(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def counts(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Function that allows the user to mark incorrectly answered words as correct.
+    This is useful if there was a typo or the smartphone's autocorrect messed up the
+    answer.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        0, to return to the vocab step of the conversation
+    """
     vocab = context.chat_data["vocabs"].pop(-1)
     await send(
         update,

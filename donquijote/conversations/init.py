@@ -12,7 +12,15 @@ AGREE, NAME, WORDS_PER_DAY, REMINDER, HOW_OFTEN, WHAT_TIME = range(6)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Starts the conversation."""
+    """Function that starts the conversation.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        0, to proceed to the AGREE step of the conversation.
+    """
     reply_keyboard = [["Yes", "No"]]
 
     await send(update, "¿Qué pasa, tío?")
@@ -42,6 +50,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def agree(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Function that checks if the user agrees to learn vocabulary.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        0, if the user input was incorrect to return to the AGREE step of the conversation
+        -1, if the user doesn't want to learn or is already registered, ends the conversation
+        1, if the user wants to learn to proceed to the NAME step of the conversation
+    """
     user_info = update.message.from_user
     context.chat_data["user_id"] = user_info["id"]
 
@@ -81,6 +100,15 @@ async def agree(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Function that lets the user input a name.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        2, to proceed to the WORDS_PER_DAY step of the conversation
+    """
     user_info = update.message.from_user
     name = update.message.text.strip()
     context.chat_data["name"] = name
@@ -105,6 +133,16 @@ async def name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def words_per_day(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    """Function that lets the user define the amount of new words per day.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        2, if the user input was incorrect to return to the WORDS_PER_DAY step of the conversation
+        3, to proceed to the REMINDER step of the conversation
+    """
     choice = int_cast(update.message.text)
 
     if choice is None:
@@ -144,7 +182,17 @@ async def words_per_day(
 
 
 async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Starts the conversation."""
+    """Function that lets the set up a learning schedule.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        -1, if the user doesn't want to set up a learning schedule, ends the conversation
+        3, if the user input was incorrect to return to the REMINDER step of the conversation
+        4, to proceed to the HOW_OFTEN step of the conversation
+    """
     if update.message.text.lower() == "yes":
         context.chat_data["reminder"] = True
         await send(
@@ -177,6 +225,16 @@ async def reminder(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def how_often(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Function that lets the user define the number of reminders.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        4, if the user input was incorrect to return to the HOW_OFTEN step of the conversation
+        5, to proceed to the WHAT_TIME step of the conversation
+    """
     choice = update.message.text
     freq_dict = {"1x": 1, "2x": 2, "3x": 3}
 
@@ -204,7 +262,17 @@ async def how_often(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def what_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Starts the conversation."""
+    """Function that lets the user define the reminder times.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        -1, if everything is finished, terminates the conversation
+        5, if the user input was incorrect or if there's another reminder that must be set
+            to return to the WHAT_TIME step of the conversation
+    """
     user_info = update.message.from_user
     choice = update.message.text.strip()
 

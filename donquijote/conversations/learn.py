@@ -29,6 +29,16 @@ vocabulary = Vocabulary()
 
 
 def type_cast(inp):
+    """A helper function that helps to cast a number range (e.g. 10-20) to
+    acutal integers.
+
+    Args:
+        inp (str): The range string input, e.g. 10-20
+
+    Returns:
+        list: lower and upper bound or
+        None: if the format is wrong
+    """
     try:
         range = [int(x) for x in inp.replace(" ", "").split("-")]
     except Exception:
@@ -45,7 +55,18 @@ def type_cast(inp):
 
 
 async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Starts the conversation."""
+    """Function that starts the learn conversation flow. This conversation lets
+    the user pick a group of words (e.g. verbs, adjectives, nouns) and a range (e.g. 0-100)
+    to select a set of vocabulary to learn. The range defines the frequency of the words,
+    meaning that lower ranges (e.g. 0-10) stand for more frequently used words.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        0, to proceed to the which_word_group step of the conversation.
+    """
     reply_keyboard = [
         list(ABBRS_MAPPING.keys())[i : i + 2]
         for i in range(0, len(ABBRS_MAPPING), 2)
@@ -67,6 +88,15 @@ async def learn(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def which_word_group(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    """Function that lets the user pick a word group.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        1, to proceed to the which_word_range step of the conversation.
+    """
     group = update.message.text.lower()
     if group not in list(ABBRS_MAPPING.keys()):
         await send(
@@ -92,6 +122,16 @@ async def which_word_group(
 async def which_word_range(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    """Function that lets the user pick a frequency range.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        1, to return to the which_word_range step of the conversation if the user input was wrong
+        2, to proceed to the play_learn part of the conversation
+    """
     range = type_cast(update.message.text)
 
     if not range or range[1] >= context.chat_data["vocab_count"]:
@@ -125,6 +165,17 @@ async def which_word_range(
 async def play_learn(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
+    """Function that sends the user English words, waits for a Spanish response, and
+    checks if the answer is correct as long as all words have been guessed correctly.
+
+    Args:
+        update (telegram._update.Update): The update object
+        context (telegram.ext._callbackcontext.CallbackContext): The callback context
+
+    Returns:
+        -1, if everything is finished, ends the conversation
+        2, to return to the play_learn part of the conversation
+    """
     if len(context.chat_data["vocabs"]) > 0:
         if context.chat_data.get("message_id", None):
             await edit_message_text(context)

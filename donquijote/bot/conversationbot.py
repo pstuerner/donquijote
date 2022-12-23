@@ -45,6 +45,14 @@ from donquijote.conversations.settings import (
 
 
 def main() -> None:
+    """Main entrypoint of the conversation bot.
+
+    Args:
+        None
+
+    Returns:
+        None. Runs the python-telegram-bot application.
+    """
     application = (
         Application.builder()
         .token(os.environ["BOT_TOKEN"])
