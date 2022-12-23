@@ -1,4 +1,4 @@
-<div style="text-align: center;">
+<p align="center">
 <pre>
     ___              ____       _  _       _       
    /   \___  _ __   /___ \_   _(_)(_) ___ | |_ ___ 
@@ -7,29 +7,25 @@
 /___,' \___/|_| |_\___,_\ \__,_|_|/ |\___/ \__\___|
                                 |__/               
 </pre>
-</div>
+</p>
 
 </br><hr></br>
 
-<div style="text-align: center;">
-  <img src="bot_qr.png" alt="QR code for chatbot" style="width: 50%; height: 50%;">
-</div>
+<p align="center">
+  <img src="bot_qr.png" alt="QR code for chatbot" style="width: 40%; height: 40%;">
+</p>
 
 </br><hr></br>
 
-<div style="display: flex;">
-  <div style="flex: 1; text-align: center;">
-    ¡Aprende Español de manera rápida y fácil!<br>
-    Las palabras más comunes a tu alcances
-  </div>
-  <div style="flex: 1; text-align: center;">Learn Spanish quickly and easily!<br>
-    The most common words at your fingertips
-  </div>
-</div>
-
+<p align="center">
+¡Aprende Español de manera rápida y fácil!<br>
+Las palabras más comunes a tu alcances
+<p align="center">
+Learn Spanish quickly and easily!<br>
+The most common words at your fingertips
 </br><hr></br>
 
-<div style="text-align: center;">
+<p align="center">
   Don Quijote, my noble guide<br>
   In La Mancha, by his side<br>
   I learned the language of Spain<br>
@@ -42,7 +38,7 @@
   The beautiful tongue of this land<br>
   All thanks to my dear friend<br>
   Don Quijote, until the very end
-</div>
+</p>
 
 </br><hr>
 
@@ -75,12 +71,18 @@ You can run the chatbot by yourself. All you need is a bot token that you can cr
 </pre>
 </p>
 <p>
-Of course it's easier to use my already running version of the DonQuijote bot :) You can find it on Telegram by searching for the following user</br>
-<b><span style="display: block; text-align: center;">@donquijote_ps_bot</span></b></br>
-or scanning the following QR code</br>
-<div style="text-align: center;">
+Of course it's easier to use my already running version of the DonQuijote bot :) You can find it on Telegram by searching for the following user
+</p>
+<p align="center">
+<b><span style="display: block; text-align: center;">@donquijote_ps_bot</span></b>
+</p>
+<p>
+or scanning the following QR code
+</p>
+<p align="center">
   <img src="bot_qr.png" alt="QR code for chatbot" style="width: 50%; height: 50%;">
-</div>
+</p>
+<p>
 and simply initiate the conversation by sending /start.
 </p>
 
